@@ -1,0 +1,246 @@
+﻿@{
+    ViewBag.Title = "Material Staging Dashboard";
+}
+
+<div class="card ATEC-theme-color mb-3">
+    <div class="card-header text-white">
+        <h3>Dashboard</h3>
+    </div>
+</div>
+
+
+<div class="card pb-3">
+    <div class="card-body">
+        @* Validate *@
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="mb-3">
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@modelError.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+
+        <div class="row p-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Material</label>
+                    <select id="materialSelect" class="select2">
+                        <option value="1">Epoxy</option>
+                        <option value="2">Molding Compound</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-success" id="autoLoad">Stop Auto Load</button>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-sm-2 mb-3 mb-sm-0">
+                <div class="card">
+                    <div class="card-body" style="cursor:pointer; background-color:#379777" id="divSuccess">
+                        <h4 class="card-title" style="font-weight: bolder" >Ready</h4>
+                        <h3 class="card-text" id="txtSuccess">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="card">
+                    <div class="card-body" style="cursor:pointer; background-color:#FFF078" id="divThawing">
+                        <h4 class="card-title">Thawing Stage</h4>
+                        <h3 class="card-text" id="txtThawing">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="card">
+                    <div class="card-body" style="cursor:pointer; background-color: #E4003A" id="divExpired">
+                        <h4 class="card-title">Expired</h4>
+                        <h3 class="card-text" id="txtExpired">0</h3>                        
+                    </div>                    
+                </div>
+            </div>
+        </div>
+
+        @* Table *@
+        <div class="p-3" id="materialTableList"></div>       
+
+        <div class="row p-3 d-none" id="divCancel">
+            <div class="col-md-3">
+                <a asp-controller="MaterialStaging" class="btn btn-warming asp-action="MaterialDashboard">Cancel</a>"
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        //initialize select
+        $('.select2').select2({
+            width: '100%'
+        });
+        var selectedMaterial = $('#materialSelect').val();
+
+        var typingInterval = 5000
+        var running = true;
+        var intervalId;
+        var runAutoLoad = 'Run Auto Load'
+        var stopAutoLoad = 'Stop Auto Load'
+        var count, thawing, expired;
+        var tableList = "";
+
+        $(function () {
+
+            function updateCounts() {
+                return callMaterialList(selectedMaterial)
+                    .then(() => {
+                        const count = countRowsWithCharacter('MaterialListTable', 0, 1);
+                        const thawing = countRowsWithCharacter('MaterialListTable', 0, 2);
+                        const expired = countRowsWithCharacter('MaterialListTable', 0, 3);
+                        return { count, thawing, expired };
+                    })
+                    .then(({ count, thawing, expired }) => {
+                        assignCount(count, thawing, expired);
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // Initial call
+            updateCounts();
+
+            // Event listener for material selection change
+            $('#materialSelect').change(function () {
+                updateCounts();
+            });
+
+            // Periodic updates if running
+            if (running) {
+                intervalId = setInterval(updateCounts, typingInterval);
+            }
+
+        });
+
+        $("#autoLoad").click(function () {
+            running ? stopInterval() : startInterval();
+        });
+
+        function stopInterval() {
+            running = false
+            clearInterval(intervalId);
+            $("#autoLoad").text(runAutoLoad)
+            $("#autoLoad").removeClass('btn-success').addClass('btn-danger')
+        }
+
+        function startInterval() {
+
+            intervalId = setInterval(function () {
+                callMaterialList(selectedMaterial)
+                    .then(() => {
+                        const count = countRowsWithCharacter('MaterialListTable', 0, 1);
+                        const thawing = countRowsWithCharacter('MaterialListTable', 0, 2);
+                        const expired = countRowsWithCharacter('MaterialListTable', 0, 3);
+                        return { count, thawing, expired };
+                    })
+                    .then(({ count, thawing, expired }) => {
+                        assignCount(count, thawing, expired);
+                    })
+                    .catch(error => console.error('Error:', error));
+            }, typingInterval);
+
+            running = true
+            $("#autoLoad").text(stopAutoLoad)
+            $("#autoLoad").removeClass('btn-danger').addClass('btn-success')
+        }
+
+        $('#materialSelect').change(function () {
+            selectedMaterial = $(this).val();
+        });
+
+        //Call Material List
+        callMaterialList = (paramSelectedMaterial) => {
+            return new Promise((resolve, reject) => { 
+                $.ajax({
+                    type: "GET",
+                    url: "/MaterialStaging/_MaterialDashboardListTable",
+                    data: {
+                        MaterialType: paramSelectedMaterial
+                    },
+                    dataType: "html",
+                    success: function (response) {
+                        $('#materialTableList').html('');
+                        $('#materialTableList').html(response);
+                        initializeDatatableV2('MaterialListTable');    
+                        resolve();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error, Please contact IT for the solution');
+                        reject();
+                    }
+                });
+            });            
+        }
+
+        $(document).on('click', '#divSuccess, #divThawing, #divExpired', function () {
+            const filterMessages = {
+                divSuccess: 1,
+                divThawing: 2,
+                divExpired: 3
+            };
+
+            callMaterialList(selectedMaterial)
+                .then(() => {
+                    const count = countRowsWithCharacter('MaterialListTable', 0, 1);
+                    const thawing = countRowsWithCharacter('MaterialListTable', 0, 2);
+                    const expired = countRowsWithCharacter('MaterialListTable', 0, 3);
+                    return { count, thawing, expired };
+                })
+                .then(({ count, thawing, expired }) => {
+                    assignCount(count, thawing, expired);
+                })
+                .then(() => filterTable('MaterialListTable', 0, filterMessages[this.id]));            
+        });
+
+        const filterTable = (tableId, columnIndex, filterMsg) => {
+            var table = $(`#${tableId}`).DataTable();
+            table.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                const data = this.data();
+                const value = data[columnIndex];
+
+                if (!value.includes(filterMsg)) {                    
+                    table.row(this).remove(); 
+                }
+            });
+            table.draw(false);
+        };
+        
+        const countRowsWithCharacter = (tableId, columnIndex, character) => {
+            const table = $(`#${tableId}`).DataTable(); 
+            let count = 0;
+            table.column(columnIndex).data().each(function (value) {
+                if (value.includes(character)) {
+                    count++;
+                }
+            });
+
+            return count;
+        }
+
+        assignCount = (count, thawing, expired) => {
+            return new Promise((resolve, reject) => {
+                console.log(count, thawing, expired)
+                $('#txtSuccess').text(count);
+                $('#txtThawing').text(thawing);
+                $('#txtExpired').text(expired);
+                resolve();
+            });
+        }
+    </script>
+}

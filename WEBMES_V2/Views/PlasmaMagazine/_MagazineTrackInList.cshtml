@@ -1,0 +1,69 @@
+﻿@model IEnumerable<WEBMES_V2.Models.DTO.PlasmaMagazineDTO.TrnMagazineDetailViewDTO>;
+
+<div class="row mb-2">
+    <div class="col-md-2">
+            <label for="txtMagazineCode" id="textMagazineID" class="form-label">Magazine ID</label>
+            <input type="text" class="form-control" id="txtMagazineCode" disabled="disabled" >
+    </div>
+    <div class="col-md-3">
+        <label for="txtMagazineRemarks" class="form-label">Remarks</label>
+
+        <input type="text" class="form-control" id="txtMagazineRemarks">
+    </div>
+    <div class="col-md-2">
+        <label for="txtQTYMagazineNeeded" class="form-label">Magazine Needed</label>
+        <label id="txtQTYMagazineNeeded" class="form-label d-block "></label>
+    </div>
+    <div class="col-md-2">
+        <label for="txtMagazineTrackOutQTY" class="form-label">
+            Magazine transferred
+        </label>
+        <label id="txtMagazineTrackOutQTY" class="form-label d-block "></label>
+    </div>
+    <div class="col-md-3">
+        <button type="button" id="btnTrackOut" class="btn btn-success">Track Out</button>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+    
+        <!-- Your table goes here -->
+        <div class="table-responsive">
+            <table class="table table-hover" id="MagazineListTable">
+                <thead>
+                    <tr>
+                        <th class="fixed-cell-width">Magazine Code</th>
+                        <th class="fixed-cell-width">Magazine Qty</th>
+                        <th class="fixed-cell-width">Package</th>
+                        <th class="fixed-cell-width">Lead Count</th>
+                        <th class="fixed-cell-width">Status</th>
+                        <th class="fixed-cell-width">Station</th>
+                        <th class="fixed-cell-width">Transaction date and time</th>
+                        <th class="fixed-cell-width">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.MagazineCode</td>
+                                <td>@item.MagazineQty</td>
+                                <td>@item.PackageId</td>
+                                <td>@item.LeadCount</td>
+                                <td>@item.StatusId</td>
+                                <td>@item.StationId</td>
+                                <td>@item.DateTimeTrackIn</td>
+                                <td>@item.Remarks</td>
+                            </tr>
+                        }
+                    }
+  
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

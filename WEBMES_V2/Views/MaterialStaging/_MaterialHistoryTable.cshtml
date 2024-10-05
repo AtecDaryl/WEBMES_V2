@@ -1,0 +1,64 @@
+﻿@model IEnumerable<WEBMES_V2.Models.DTO.MaterialStagingDTO.MaterialStagingHistoryDTO>
+
+<div class="row p-3">
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <table class="table table-hover" id="MaterialHistoryListTable">
+                <thead>
+                    <tr>
+                        <th class="fixed-cell-width">Type of Epoxy</th>
+                        <th class="fixed-cell-width">Batch Number/Syringe</th>
+                        <th class="fixed-cell-width">Customer</th>
+                        <th class="fixed-cell-width">Thawing Date/Time IN</th>
+                        <th class="fixed-cell-width">Thaw In By</th>
+                        <th class="fixed-cell-width">Thawing Date/Time OUT</th>
+                        <th class="fixed-cell-width">Thaw Out By</th>
+                        <th class="fixed-cell-width">Epoxy Floor life end</th>
+                        <th class="fixed-cell-width">Manufacturing Expiration</th>
+                        <th class="fixed-cell-width">Date Used</th>
+                        <th class="fixed-cell-width">Lot Number</th>
+                        <th class="fixed-cell-width">Machine ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.MaterialDesc</td>
+                                <td>@item.BatchNumber</td>
+                                <td>@item.CustomerId</td>
+                                <td>@item.ThawIn</td>
+                                <td>@item.ThawInBy</td>
+                                <td>@item.ThawOut</td>
+                                <td>@item.ThawOutBy</td>
+                                <td>@item.WorkLifeEnd</td>
+                                <td>@item.ExpirationDate</td>
+                                <td>@item.DateUsed</td>
+                                <td>@item.LotNumber</td>
+                                <td>@item.MachineNo</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class="fixed-cell-width">Type of Epoxy</th>
+                        <th class="fixed-cell-width">Batch Number/Syringe</th>
+                        <th class="fixed-cell-width">Customer</th>
+                        <th class="fixed-cell-width">Thawing Date/Time IN</th>
+                        <th class="fixed-cell-width">Thaw In By</th>
+                        <th class="fixed-cell-width">Thawing Date/Time OUT</th>
+                        <th class="fixed-cell-width">Thaw Out By</th>
+                        <th class="fixed-cell-width">Epoxy Floor life end</th>
+                        <th class="fixed-cell-width">Manufacturing Expiration</th>
+                        <th class="fixed-cell-width">Date Used</th>
+                        <th class="fixed-cell-width">Lot Number</th>
+                        <th class="fixed-cell-width">Machine ID</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

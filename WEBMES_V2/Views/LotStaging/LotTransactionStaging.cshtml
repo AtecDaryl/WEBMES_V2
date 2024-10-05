@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = "Lot Transaction Staging";
+}
+
+<div class="card ATEC-theme-color mb-3">
+    <div class="card-header text-white">
+        <h3>Lot Transaction Staging</h3>
+    </div>
+</div>
+
+<div class="card pb-3">
+    <div class="card-body">
+        <div class="row p-3">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Customer</label>
+                    <select id="customerSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Process Type</label>
+                    <select id="processTypeSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Package Type</label>
+                    <select id="packageTypeSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Lead Type</label>
+                    <select id="leadTypeSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Sublot Size</label>
+                    <select id="sublotSizeSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Start Station</label>
+                    <select id="startProcessSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Start Timing</label>
+                    <select id="startTimingSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>End Station</label>
+                    <select id="endProcessSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Stop Timing</label>
+                    <select id="stopTimingSelect" class="select2">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="txtStagingTime" class="form-label">Staging Time (Hours)</label>
+                    <input type="text" class="form-control" id="txtStagingTime" disabled="disabled" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        //initialize select
+        $('.select2').select2({
+            width: '100%'
+        });
+
+
+
+
+    </script>
+}
+

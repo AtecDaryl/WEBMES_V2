@@ -1,0 +1,199 @@
+﻿@model WEBMES_V2.Models.StaticModels.Generic.SearchData
+
+@{
+    ViewBag.Title = "MATERIAL HISTORY";
+    var searchData = ViewBag.SearchData;
+}
+
+<div class="card ATEC-theme-color mb-3">
+    <div class="card-header text-white">
+        <h3>Material Thawing History</h3>
+    </div>
+</div>
+
+<div class="card pb-3">
+    <div class="card-body">
+        @* @using (Html.BeginForm("SearchList", "MaterialStaging", FormMethod.Post))
+        {
+            <div class="row p-3">
+                <div class="col-md-6">
+                    @Html.AntiForgeryToken()
+                    @Html.TextBoxFor(model => model.searchValue, new { @class = "form-control", @placeholder = "Search"})
+                </div>
+            </div>
+        }
+        <hr /> *@
+        <div class="row p-3">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Material</label>
+                    <select id="materialSelect" class="select2">
+                        <option value="1">Epoxy</option>
+                        <option value="2">Molding Compound</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label>Customer</label>
+                <select id="customerSelect" class="select2">
+                    <!-- Customer options will be dynamically populated -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Date From</label>
+                    <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" name="dateFrom" data-target="#dateFrom" id="dateFrom" placeholder="Select Date From" />
+                        <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Date To</label>
+                    <div class="input-group date" id="dateTo" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" name="dateTo" data-target="#dateTo" id="dateTo" placeholder="Select Date To" />
+                        <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row p-3">
+            <button type="button" class="btn btn-primary" id="viewHistoryButton">View History</button>
+        </div>
+        <div id="historyTable"></div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        // var searchData = '@Html.Raw(searchData)';
+        var selectedMaterial = $('#materialSelect').val();
+        // //initialize select
+        $('.select2').select2({
+            width: '100%'
+        });
+        $('.date').datetimepicker({
+            format: 'L'
+        });
+
+        $(() => {
+            loginAPI()
+                .then(() => getMaterialCustomer(selectedMaterial));
+        });
+
+        var AtecUsername = 'dsibayan@atecphil.com';
+        var AtecPassword = 'TheReal08*';
+
+        loginAPI = () => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: 'http://192.168.1.65:400/login?useCookies=true',
+                    // url: "https://localhost:7250/login?useCookies=true",
+                    //url: "http://localhost:5058/login?useCookies=true",
+                    type: 'POST',
+                    headers: {
+                        'accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify({
+                        "email": AtecUsername,
+                        "password": AtecPassword
+                    }),
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (response) {
+                        console.log("LOG IN");
+                        console.log(response);
+                        resolve();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error in LOG IN:', error);
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        getMaterialCustomer = (selectedMaterial) => {
+            return new Promise((resolve, reject) => {
+                htmlLine = '';
+                $.ajax({
+                    url: 'http://192.168.1.65:400/api/Staging/GetMaterialHistory',
+                    //url: 'http://localhost:5058/api/Staging/GetMaterialHistory',
+                    type: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'paramMaterialType': selectedMaterial,
+                        'paramMode': 1
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: (response) => {
+                        $.each(response.details, function (item, value) {
+                            htmlLine += '<option value=' + value['customerCode'] + '>' + value['customerId'] + '</option>';
+                        });
+                        $('#customerSelect').html(htmlLine);
+                        resolve(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error in LOG IN:', error);
+                        reject(error);
+                    }
+
+                });
+            });
+        }
+
+        $(document).on('click', '#viewHistoryButton', () => {
+            generateHistoryTable()
+                .catch(error => console.error('Error: ' + error));
+        });
+
+        generateHistoryTable = () => {
+            var paramMaterialType = $('#materialSelect').val();
+            var paramCustomerCode = $('#customerSelect').val();
+            var dateFrom = $('#dateFrom').datetimepicker('date');
+            var dateTo = $('#dateTo').datetimepicker('date');
+
+            var dateFromFormated = dateFrom.format('MM/DD/YYYY');
+            var dateToFormated = dateTo.format('MM/DD/YYYY');
+            var paramMode = 2;
+
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: "GET",
+                    url: "/MaterialStaging/_MaterialHistoryTable",
+                    data: {
+                        MaterialType: paramMaterialType,
+                        CustomerCode: paramCustomerCode,
+                        DateFrom: dateFromFormated,
+                        DateTo: dateToFormated,
+                        Mode: paramMode
+                    },
+                    dataType: "html",
+                    success: (response) => {
+                        $('#historyTable').html('');
+                        $('#historyTable').html(response);
+                        initializeDatatableV2('MaterialHistoryListTable');
+                        resolve();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error, Please contact IT for the solution');
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+
+        </script>
+}
